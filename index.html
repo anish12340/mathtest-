@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Math Test Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
+
+    body, html {
+      margin: 0; padding: 0;
+      height: 100%;
+      background: yellow;
+      font-family: 'Roboto', sans-serif;
+      overflow: hidden;
+    }
+    #startUI, #gameUI, #winUI, #retryUI {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      opacity: 0;
+      transition: opacity 1s;
+      background: yellow;
+      z-index: 10;
+    }
+    #startUI h1 {
+      color: black;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 20px;
+      font-size: 20px;
+      margin: 10px;
+    }
+    #balloons {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    .balloon {
+      width: 40px;
+      height: 60px;
+      background: red;
+      border-radius: 50% 50% 50% 50%;
+      position: absolute;
+      animation: float 4s linear infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(100%); }
+      100% { transform: translateY(-100%); }
+    }
+  </style>
+</head>
+<body>
+  <div id="startUI">
+    <h1>Made by Anish Sharma</h1>
+    <button onclick="startGame()" id="startButton">Start</button>
+  </div>
+  <div id="gameUI">
+    <h2 id="question"></h2>
+    <div id="answers"></div>
+  </div>
+  <div id="winUI">
+    <h1>You Win!</h1>
+    <div id="balloons"></div>
+    <button onclick="nextLevel()">Go to Next Level</button>
+  </div>
+  <div id="retryUI">
+    <h1>Retry</h1>
+    <button onclick="retryLevel()">Try Again</button>
+  </div>
+
+<script>
+let level = 1;
+let correctAnswer = 0;
+
+function fadeIn(el, callback) {
+  el.style.display = 'flex';
+  requestAnimationFrame(() => {
+    el.style.opacity = 1;
+    setTimeout(() => callback && callback(), 1000);
+  });
+}
+
+function fadeOut(el, callback) {
+  el.style.opacity = 0;
+  setTimeout(() => {
+    el.style.display = 'none';
+    callback && callback();
+  }, 1000);
+}
+
+window.onload = function() {
+  fadeIn(document.getElementById('startUI'));
+};
+
+function startGame() {
+  const startBtn = document.getElementById('startButton');
+  if (startBtn) startBtn.style.display = 'none';
+  fadeOut(document.getElementById('startUI'), () => {
+    fadeIn(document.getElementById('gameUI'), () => {
+      generateQuestion();
+    });
+  });
+}
+
+function generateQuestion() {
+  const num1 = Math.floor(Math.random() * 10 + 1);
+  const num2 = Math.floor(Math.random() * 10 + 1);
+  const operations = ['+', '-', '*', '/'];
+  const operation = operations[Math.floor(Math.random() * operations.length)];
+  let questionText;
+
+  switch(operation) {
+    case '+':
+      correctAnswer = num1 + num2;
+      questionText = `${num1} + ${num2}`;
+      break;
+    case '-':
+      correctAnswer = num1 - num2;
+      questionText = `${num1} - ${num2}`;
+      break;
+    case '*':
+      correctAnswer = num1 * num2;
+      questionText = `${num1} × ${num2}`;
+      break;
+    case '/':
+      correctAnswer = Math.floor((num1 * num2) / num1);
+      questionText = `${num1 * num2} ÷ ${num1}`;
+      break;
+  }
+
+  document.getElementById("question").innerText = `${questionText} = ?`;
+
+  let answers = [correctAnswer];
+  while (answers.length < 3) {
+    let wrong = correctAnswer + Math.floor(Math.random() * 5 + 1);
+    if (!answers.includes(wrong)) answers.push(wrong);
+  }
+
+  answers.sort(() => 0.5 - Math.random());
+
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = '';
+  answers.forEach(ans => {
+    const btn = document.createElement("button");
+    btn.innerText = ans;
+    btn.onclick = () => checkAnswer(ans);
+    answersDiv.appendChild(btn);
+  });
+}
+
+function checkAnswer(selected) {
+  if (selected === correctAnswer) {
+    fadeOut(document.getElementById("gameUI"), () => {
+      fadeIn(document.getElementById("winUI"), () => {
+        showBalloons();
+      });
+    });
+  } else {
+    fadeOut(document.getElementById("gameUI"), () => {
+      fadeIn(document.getElementById("retryUI"));
+    });
+  }
+}
+
+function retryLevel() {
+  fadeOut(document.getElementById("retryUI"), () => {
+    fadeIn(document.getElementById("gameUI"), () => {
+      generateQuestion();
+    });
+  });
+}
+
+function showBalloons() {
+  const balloonContainer = document.getElementById("balloons");
+  balloonContainer.innerHTML = '';
+  for (let i = 0; i < 20; i++) {
+    const balloon = document.createElement("div");
+    balloon.className = "balloon";
+    balloon.style.left = `${Math.random() * 100}%`;
+    balloon.style.background = `hsl(${Math.random() * 360}, 100%, 60%)`;
+    balloon.style.animationDelay = `${Math.random() * 3}s`;
+    balloonContainer.appendChild(balloon);
+  }
+}
+
+function nextLevel() {
+  level++;
+  fadeOut(document.getElementById("winUI"), () => {
+    fadeIn(document.getElementById("gameUI"), () => {
+      generateQuestion();
+    });
+  });
+}
+</script>
+</body>
+</html>
+
+
+
+
